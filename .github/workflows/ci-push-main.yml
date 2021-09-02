@@ -1,0 +1,40 @@
+name: CI push main
+
+on:
+  push:
+    branches:
+      - 'main'
+
+jobs:
+
+  realese:
+    runs-on: ubuntu-latest
+    steps:
+        - name: Bump version and push tag
+          id: tag_version
+          uses: mathieudutour/github-tag-action@v5.5
+          with:
+            release_branches: main
+            default_bump: major
+            github_token: ${{ secrets.GITHUB_TOKEN }}
+
+        - name: Create a GitHub release
+          uses: actions/create-release@v1
+          id: create_release
+          env:
+            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          with:
+            tag_name: ${{ steps.tag_version.outputs.new_tag }}
+            release_name: Release ${{ steps.tag_version.outputs.new_tag }}
+            body: ${{ steps.tag_version.outputs.changelog }}
+        - uses: actions/checkout@v1
+        
+        - name: Build auth service docker image
+          working-directory: ./
+          run: docker build -t ${{ secrets.DOCKER_USER }}/auth-service:${{ steps.tag_version.outputs.new_tag }} --no-cache .
+        
+        - name: Login to Docker Hub
+          run: docker login -u ${{ secrets.DOCKER_USER }} -p ${{ secrets.DOCKER_PASS }}
+        - name: Publish Docker images
+          run: | 
+            docker push  ${{ secrets.DOCKER_USER }}/auth-service:${{ steps.tag_version.outputs.new_tag }}
