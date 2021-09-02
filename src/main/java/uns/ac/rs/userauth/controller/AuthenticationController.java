@@ -7,6 +7,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mail.MailException;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -23,7 +24,7 @@ public class AuthenticationController {
 	@Autowired
 	private CustomUserDetailsService userDetailsService;
 	
-	@RequestMapping(value = "/registration", method = RequestMethod.POST)
+	@PostMapping(value = "/registration")
 	public ResponseEntity<?> register(@RequestBody UserRegistrationDTO user) {
 		try {
 			System.out.println(user);
@@ -31,13 +32,11 @@ public class AuthenticationController {
 		} catch (InvalidDataException e) {
 			return new ResponseEntity<String>(e.getMessage(), HttpStatus.NOT_ACCEPTABLE);
 		} catch ( MailException | UnsupportedEncodingException |  InterruptedException e ) {		
-			System.out.println(e.getMessage());
-			System.out.println(e.getLocalizedMessage());
 			return new ResponseEntity<String>("Error while sending e-mail. Check to see if you entered it right!",HttpStatus.BAD_REQUEST);
 		}
 	}
 	
-	@RequestMapping(value = "/confirm/{token}", method = RequestMethod.POST)
+	@PostMapping(value = "/confirm/{token}")
 	public ResponseEntity<?> confirmRegistration(@PathVariable String token) {		
 		try {
 			return new ResponseEntity<Boolean>(userDetailsService.confirmRegistration(token), HttpStatus.CREATED);

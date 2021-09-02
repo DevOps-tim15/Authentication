@@ -47,7 +47,5 @@ public class EmailService {
 
 		mail.setText(tekst);
 		javaMailSender.send(mail);
-
-		System.out.println("Email sent.");
 	}
 }

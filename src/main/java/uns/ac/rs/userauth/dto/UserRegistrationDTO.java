@@ -9,9 +9,9 @@ public class UserRegistrationDTO {
 	private String lastName;
 	private String phone;
 	private String websiteUrl;
-	public String sex;
-	public String birthDate;
-	public String biography;
+	private String sex;
+	private String birthDate;
+	private String biography;
 
 	public UserRegistrationDTO() {
 		super();
