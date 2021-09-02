@@ -8,6 +8,7 @@ import java.io.UnsupportedEncodingException;
 
 import javax.transaction.Transactional;
 
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.jupiter.api.Order;
 import org.junit.runner.RunWith;
@@ -43,10 +44,6 @@ public class AuthenticationIT {
 	@Autowired
 	private PasswordEncoder passwordEncoder;
 
-    
-	@Test
-	@Transactional
-	@Order(1)
 	public void userRegistration_successfully() throws Exception {
 		UserRegistrationDTO dto = new UserRegistrationDTO();
 		String username = "pera";
