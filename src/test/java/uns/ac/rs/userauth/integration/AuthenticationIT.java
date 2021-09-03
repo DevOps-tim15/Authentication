@@ -2,19 +2,24 @@ package uns.ac.rs.userauth.integration;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import java.io.UnsupportedEncodingException;
 
 import javax.transaction.Transactional;
 
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.jupiter.api.Order;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.web.client.TestRestTemplate;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.mail.MailException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
@@ -25,6 +30,7 @@ import uns.ac.rs.userauth.domain.UserType;
 import uns.ac.rs.userauth.domain.VerificationToken;
 import uns.ac.rs.userauth.dto.UserRegistrationDTO;
 import uns.ac.rs.userauth.repository.VerificationTokenRepository;
+import uns.ac.rs.userauth.security.JwtAuthenticationRequest;
 import uns.ac.rs.userauth.service.CustomUserDetailsService;
 import uns.ac.rs.userauth.util.InvalidDataException;
 
@@ -43,6 +49,10 @@ public class AuthenticationIT {
     
 	@Autowired
 	private PasswordEncoder passwordEncoder;
+	
+	@Autowired
+    private TestRestTemplate testRestTemplate;
+
 
 	public void userRegistration_successfully() throws Exception {
 		UserRegistrationDTO dto = new UserRegistrationDTO();
@@ -84,5 +94,30 @@ public class AuthenticationIT {
 			throw e;
 		}
     }
-
+	
+	@Test
+	@Transactional
+	@Order(3)
+	public void loginTest_successfully() throws Exception {
+		JwtAuthenticationRequest req = new JwtAuthenticationRequest("jova", "123");
+		HttpEntity<JwtAuthenticationRequest> httpEntity = new HttpEntity<JwtAuthenticationRequest>(req);
+		String url = "/login";
+		ResponseEntity<String> responseEntity = testRestTemplate.exchange(url, HttpMethod.POST, httpEntity, String.class);
+		assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
+		String token = responseEntity.getBody();
+		assertNotNull(token);
+	}
+	
+	@Test
+	@Transactional
+	@Order(4)
+	public void loginTest_wrong_password() throws Exception {
+		JwtAuthenticationRequest req = new JwtAuthenticationRequest("jova", "wrong-pass");
+		HttpEntity<JwtAuthenticationRequest> httpEntity = new HttpEntity<JwtAuthenticationRequest>(req);
+		String url = "/login";
+		ResponseEntity<String> response = testRestTemplate.exchange(url, HttpMethod.POST, httpEntity, String.class);
+		String message = response.getBody();
+		assertEquals("Wrong password!", message);
+		assertEquals(HttpStatus.NOT_ACCEPTABLE, response.getStatusCode());
+	}
 }
