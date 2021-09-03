@@ -68,7 +68,7 @@ public class AuthenticationController {
 	
 	@PostMapping(value = "/login")
 	public ResponseEntity<String> createAuthenticationToken(@RequestBody JwtAuthenticationRequest authenticationRequest,
-			HttpServletResponse response) throws AuthenticationException, IOException {
+			HttpServletResponse response) throws AuthenticationException{
 
 		final Authentication authentication;
 		try {
@@ -78,19 +78,19 @@ public class AuthenticationController {
 						authenticationRequest.getPassword()));
 		}
 		catch(UsernameNotFoundException e) {
-			return new ResponseEntity<String>(e.getMessage(),HttpStatus.NOT_ACCEPTABLE);
+			return new ResponseEntity<>(e.getMessage(),HttpStatus.NOT_ACCEPTABLE);
 		}
 		catch(BadCredentialsException e) {
-			return new ResponseEntity<String>("Wrong password!",HttpStatus.NOT_ACCEPTABLE);
+			return new ResponseEntity<>("Wrong password!",HttpStatus.NOT_ACCEPTABLE);
 		}
 		SecurityContextHolder.getContext().setAuthentication(authentication);
 
 		User user = (User) authentication.getPrincipal();
 		if(!user.isVerified()) {
-			return new ResponseEntity<String>("Not verified! See your email for verification.",HttpStatus.NOT_ACCEPTABLE);
+			return new ResponseEntity<>("Not verified! See your email for verification.",HttpStatus.NOT_ACCEPTABLE);
 		}
 		String jwt = tokenUtils.generateToken(user.getUsername(), user.getAuthorities().get(0).getUserType());
-		return new ResponseEntity<String>(jwt, HttpStatus.OK);
+		return new ResponseEntity<>(jwt, HttpStatus.OK);
 	}
 	
 	@PostMapping(value = "/signout", produces="text/plain")
@@ -107,7 +107,7 @@ public class AuthenticationController {
 	
     @PreAuthorize("hasRole('ROLE_REGISTERED_USER')")
 	@GetMapping( value = "/verify-registered-user")
-    public ResponseEntity<?> verifyRegisteredUser() {
+    public ResponseEntity<String> verifyRegisteredUser() {
         return new ResponseEntity<>("Hello registered user!", HttpStatus.OK);
     }
 }
