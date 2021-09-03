@@ -1,6 +1,5 @@
 package uns.ac.rs.userauth.controller;
 
-import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 
 import javax.servlet.http.HttpServletResponse;
@@ -99,7 +98,6 @@ public class AuthenticationController {
         	SecurityContextHolder.clearContext();
             return new ResponseEntity<>("You have successfully logged out!", HttpStatus.OK);
         }catch (Exception e) {
-			e.printStackTrace();
 			return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
 		}
 
