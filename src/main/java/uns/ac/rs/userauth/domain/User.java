@@ -60,8 +60,14 @@ public class User implements UserDetails{
 
 	@Column(name = "biography")
 	public String biography;
+	
+	@Column(name = "canBeTagged")
+	public Boolean canBeTagged;
 
-	@ManyToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+	@Column(name = "isPrivate")
+	public Boolean isPrivate;
+	
+	@ManyToMany(fetch = FetchType.EAGER)
 	@JoinTable(name = "user_authority", joinColumns = @JoinColumn(name = "user_id", referencedColumnName = "id"), inverseJoinColumns = @JoinColumn(name = "authority_id", referencedColumnName = "id"))
 	@JsonBackReference(value = "user-authority")
 	private List<Authority> authorities;
@@ -71,8 +77,8 @@ public class User implements UserDetails{
 	}
 
 	public User(Long id, String username, String password, String email, String firstName, String lastName,
-			String phone, boolean verified, String websiteUrl, String sex, String birthDate, String biography,
-			List<Authority> authorities) {
+			String phone, boolean verified, String websiteUrl, String sex, String birthDate, String biography, Boolean canBeTagged,
+			Boolean isPrivate, List<Authority> authorities) {
 		super();
 		this.id = id;
 		this.username = username;
@@ -86,11 +92,14 @@ public class User implements UserDetails{
 		this.sex = sex;
 		this.birthDate = birthDate;
 		this.biography = biography;
+		this.canBeTagged = canBeTagged;
+		this.isPrivate = isPrivate;
 		this.authorities = authorities;
 	}
 
 	public User(String username, String password, String email, String firstName, String lastName,
-			String phone, String websiteUrl, String sex, String birthDate, String biography) {
+			String phone, String websiteUrl, String sex, String birthDate, String biography, Boolean canBeTagged,
+			Boolean isPrivate) {
 		super();
 		this.username = username;
 		this.password = password;
@@ -102,6 +111,8 @@ public class User implements UserDetails{
 		this.sex = sex;
 		this.birthDate = birthDate;
 		this.biography = biography;
+		this.canBeTagged = canBeTagged;
+		this.isPrivate = isPrivate;
 	}
 
 	public Long getId() {
@@ -199,6 +210,22 @@ public class User implements UserDetails{
 	public void setBiography(String biography) {
 		this.biography = biography;
 	}
+	
+	public Boolean getCanBeTagged() {
+		return canBeTagged;
+	}
+
+	public void setCanBeTagged(Boolean canBeTagged) {
+		this.canBeTagged = canBeTagged;
+	}
+
+	public Boolean getIsPrivate() {
+		return isPrivate;
+	}
+
+	public void setIsPrivate(Boolean isPrivate) {
+		this.isPrivate = isPrivate;
+	}
 
 	@Override
 	public List<Authority> getAuthorities() {
@@ -234,6 +261,8 @@ public class User implements UserDetails{
 		return "User [id=" + id + ", username=" + username + ", password=" + password + ", email=" + email
 				+ ", firstName=" + firstName + ", lastName=" + lastName + ", phone=" + phone + ", verified=" + verified
 				+ ", websiteUrl=" + websiteUrl + ", sex=" + sex + ", birthDate=" + birthDate + ", biography="
-				+ biography + ", authorities=" + authorities + "]";
+				+ biography + ", canBeTagged=" + canBeTagged + ", isPrivate=" + isPrivate + ", authorities="
+				+ authorities + "]";
 	}
+
 }

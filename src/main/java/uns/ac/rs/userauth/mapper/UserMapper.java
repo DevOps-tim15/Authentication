@@ -10,7 +10,7 @@ public class UserMapper {
 		return new User(dto.getUsername(), dto.getPassword(), 
 				dto.getEmail(), dto.getFirstName(), dto.getLastName(),
 				dto.getPhone(), dto.getWebsiteUrl(), dto.getSex(),
-				dto.getBirthDate(), dto.getBiography());
+				dto.getBirthDate(), dto.getBiography(), dto.getCanBeTagged(), dto.getIsPrivate());
 	}
 
 }

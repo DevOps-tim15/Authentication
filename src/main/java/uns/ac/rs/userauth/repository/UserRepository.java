@@ -6,7 +6,7 @@ import org.springframework.data.jpa.repository.Query;
 import uns.ac.rs.userauth.domain.User;
 
 
-public interface UserRepository extends JpaRepository<User, Integer> {
+public interface UserRepository extends JpaRepository<User, Long> {
 	User findByUsername(String username);
 	User findByEmail(String email);
 	User findByUsernameAndPassword(String username, String password);

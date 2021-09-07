@@ -12,13 +12,16 @@ public class UserRegistrationDTO {
 	private String sex;
 	private String birthDate;
 	private String biography;
+	private Boolean canBeTagged;
+	private Boolean isPrivate;
 
 	public UserRegistrationDTO() {
 		super();
 	}
 
 	public UserRegistrationDTO(String username, String password, String email, String firstName, String lastName,
-			String phone, String websiteUrl, String sex, String birthDate, String biography) {
+			String phone, String websiteUrl, String sex, String birthDate, String biography, Boolean canBeTagged,
+			Boolean isPrivate) {
 		super();
 		this.username = username;
 		this.password = password;
@@ -30,6 +33,8 @@ public class UserRegistrationDTO {
 		this.sex = sex;
 		this.birthDate = birthDate;
 		this.biography = biography;
+		this.canBeTagged = canBeTagged;
+		this.isPrivate = isPrivate;
 	}
 
 	public String getUsername() {
@@ -112,13 +117,28 @@ public class UserRegistrationDTO {
 		this.biography = biography;
 	}
 
+	public Boolean getCanBeTagged() {
+		return canBeTagged;
+	}
+
+	public void setCanBeTagged(Boolean canBeTagged) {
+		this.canBeTagged = canBeTagged;
+	}
+
+	public Boolean getIsPrivate() {
+		return isPrivate;
+	}
+
+	public void setIsPrivate(Boolean isPrivate) {
+		this.isPrivate = isPrivate;
+	}
+
 	@Override
 	public String toString() {
 		return "UserRegistrationDTO [username=" + username + ", password=" + password + ", email=" + email
 				+ ", firstName=" + firstName + ", lastName=" + lastName + ", phone=" + phone + ", websiteUrl="
-				+ websiteUrl + ", sex=" + sex + ", birthDate=" + birthDate + ", biography=" + biography + "]";
+				+ websiteUrl + ", sex=" + sex + ", birthDate=" + birthDate + ", biography=" + biography
+				+ ", canBeTagged=" + canBeTagged + ", isPrivate=" + isPrivate + "]";
 	}
-	
+
 }
-
-

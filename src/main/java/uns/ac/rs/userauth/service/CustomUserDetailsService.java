@@ -1,9 +1,11 @@
 package uns.ac.rs.userauth.service;
 
 import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.UUID;
 import java.util.stream.Stream;
 
 import org.apache.commons.logging.Log;
@@ -16,9 +18,14 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+
 import uns.ac.rs.userauth.domain.Authority;
 import uns.ac.rs.userauth.domain.User;
+import uns.ac.rs.userauth.domain.VerificationToken;
 import uns.ac.rs.userauth.dto.UserRegistrationDTO;
+import uns.ac.rs.userauth.kafka.Producer;
+import uns.ac.rs.userauth.kafka.domain.UserMessage;
 import uns.ac.rs.userauth.mapper.UserMapper;
 import uns.ac.rs.userauth.repository.AuthorityRepository;
 import uns.ac.rs.userauth.repository.UserRepository;
@@ -40,8 +47,13 @@ public class CustomUserDetailsService implements UserDetailsService {
 	
 	@Autowired
 	private EmailService emailService;
+	
+	@Autowired
+	private VerificationTokenService verificationService;
 
-	// Funkcija koja na osnovu username-a iz baze vraca objekat User-a
+	@Autowired 
+	private Producer producer;
+
 	@Override
 	public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
 		UserDetails u =  userRepository.findByUsername(username);
@@ -61,7 +73,7 @@ public class CustomUserDetailsService implements UserDetailsService {
 		return this.passwordEncoder.encode(password);		
 	}
 	
-public User saveRegisteredUser(UserRegistrationDTO ru) throws InvalidDataException, MailException, UnsupportedEncodingException, InterruptedException {
+	public User saveRegisteredUser(UserRegistrationDTO ru) throws InvalidDataException, MailException, UnsupportedEncodingException, InterruptedException, JsonProcessingException {
 		
 		User u = findByUsername(ru.getUsername());
 		if(u != null) {
@@ -92,8 +104,17 @@ public User saveRegisteredUser(UserRegistrationDTO ru) throws InvalidDataExcepti
 		authorities.add(a);
 		u.setAuthorities(authorities);
 		u.setVerified(false);
-		this.userRepository.save(u);
-		emailService.sendNotificaitionAsyncRegistration(u);
+		u = this.userRepository.save(u);
+		
+		String token = UUID.randomUUID().toString();
+		VerificationToken verToken = new VerificationToken();
+		verToken.setId(null);
+		verToken.setToken(token);
+		verToken.setUser(u);
+		verificationService.saveToken(verToken);
+		String subject = "Confirmation of registration";
+		String emailMessage = String.format("Confirm your registration on this link: \nhttp://localhost:4200/#/registration/confirmation/%s",URLEncoder.encode(token, "UTF-8"));
+		emailService.sendNotificaitionAsyncRegistration(u, emailMessage, subject);
 		return u;
 	}
 	
@@ -113,13 +134,25 @@ public User saveRegisteredUser(UserRegistrationDTO ru) throws InvalidDataExcepti
 		return authorityRepository.findById(id).get();
 	}
 
-	public boolean confirmRegistration(String token) throws InvalidDataException {
+	public boolean confirmRegistration(String token) throws InvalidDataException, JsonProcessingException {
 		User user = findUserByToken(token);
 		if (user != null) {
 			user.setVerified(true);
-			this.userRepository.save(user);
+			User u = this.userRepository.save(user);
+			UserMessage message = new UserMessage(u, "registration");
+			producer.sendMessageToTopic("auth-topic", message);
 			return true;
+		}else {
+			throw new InvalidDataException("Invalid token!");
 		}
-		throw new InvalidDataException("Invalid token!");
+	}
+	
+	public void deleteUser(User u) throws MailException, UnsupportedEncodingException, InterruptedException {
+		User user = findByUsername(u.getUsername());
+		verificationService.deleteToken(user);
+		userRepository.delete(user);
+		String message = "Error happend while creating account! Please, try to register again!";
+		String subject = "Registration error!";
+		emailService.sendNotificaitionAsyncRegistration(user, message, subject);
 	}
 }

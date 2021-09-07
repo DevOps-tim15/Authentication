@@ -31,7 +31,6 @@ import uns.ac.rs.userauth.service.CustomUserDetailsService;
 import uns.ac.rs.userauth.util.InvalidDataException;
 
 @RestController
-@CrossOrigin(origins = "http://localhost:4200")
 public class AuthenticationController {
 
 	@Autowired
@@ -52,6 +51,9 @@ public class AuthenticationController {
 			return new ResponseEntity<String>(e.getMessage(), HttpStatus.NOT_ACCEPTABLE);
 		} catch ( MailException | UnsupportedEncodingException |  InterruptedException e ) {		
 			return new ResponseEntity<String>("Error while sending e-mail. Check to see if you entered it right!",HttpStatus.BAD_REQUEST);
+		} catch (Exception e ) {		
+			e.printStackTrace();
+		 return new ResponseEntity<String>(e.getMessage(),HttpStatus.BAD_REQUEST);
 		}
 	}
 	
@@ -62,6 +64,9 @@ public class AuthenticationController {
 		}
 		catch(InvalidDataException e) {
 			return new ResponseEntity<String>(e.getMessage(), HttpStatus.NOT_ACCEPTABLE);
+		}
+		catch(Exception e) {
+			return new ResponseEntity<String>(e.getMessage(), HttpStatus.BAD_REQUEST);
 		}
 	}
 	
