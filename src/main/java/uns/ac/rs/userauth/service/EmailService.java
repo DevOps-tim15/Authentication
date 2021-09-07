@@ -24,28 +24,15 @@ public class EmailService {
 	
 	@Autowired
 	private Environment env;
-	
-	@Autowired
-	private VerificationTokenService verificationService;
 
 	@Async
-	public void sendNotificaitionAsyncRegistration(User user) throws MailException, InterruptedException, UnsupportedEncodingException {
+	public void sendNotificaitionAsyncRegistration(User user, String message, String subject) throws MailException{
 		System.out.println("VErification");
-		String token = UUID.randomUUID().toString();
-		VerificationToken verToken = new VerificationToken();
-		verToken.setId(null);
-		verToken.setToken(token);
-		verToken.setUser(user);
-		verificationService.saveToken(verToken);
-
 		SimpleMailMessage mail = new SimpleMailMessage();
 		mail.setTo(user.getEmail());
 		mail.setFrom(env.getProperty("spring.mail.username"));
-		mail.setSubject("Confirmation of registration");
-		String tekst = null;
-		tekst = String.format("Confirm your registration on this link: \nhttp://localhost:4200/#/registration/confirmation/%s",URLEncoder.encode(token, "UTF-8"));
-
-		mail.setText(tekst);
+		mail.setSubject(subject);
+		mail.setText(message);
 		javaMailSender.send(mail);
 	}
 }

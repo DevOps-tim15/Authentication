@@ -9,7 +9,7 @@ WORKDIR /usr/src/userauth
 COPY . .
 RUN mvn package -P${STAGE} -DskipTests
 
-FROM openjdk:11.0-jdk AS appServerRuntime
+FROM kaca97/maven-repo:0.1.0 AS appServerRuntime
 WORKDIR /app
 COPY --from=appServerBuild /usr/src/userauth/target/userauth.jar ./
 EXPOSE 8080

@@ -25,6 +25,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+
 import uns.ac.rs.userauth.domain.User;
 import uns.ac.rs.userauth.domain.UserType;
 import uns.ac.rs.userauth.domain.VerificationToken;
@@ -53,7 +55,6 @@ public class AuthenticationIT {
 	@Autowired
     private TestRestTemplate testRestTemplate;
 
-
 	public void userRegistration_successfully() throws Exception {
 		UserRegistrationDTO dto = new UserRegistrationDTO();
 		String username = "pera";
@@ -79,7 +80,7 @@ public class AuthenticationIT {
 	@Test(expected = InvalidDataException.class)
 	@Transactional
 	@Order(2)
-    public void testRegistration_missing_data() throws MailException, UnsupportedEncodingException, InterruptedException, InvalidDataException {
+    public void testRegistration_missing_data() throws MailException, UnsupportedEncodingException, InterruptedException, InvalidDataException, JsonProcessingException {
 		UserRegistrationDTO dto = new UserRegistrationDTO();
 		
 		dto.setFirstName("Pera");

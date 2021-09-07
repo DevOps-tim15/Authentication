@@ -8,6 +8,5 @@ import uns.ac.rs.userauth.domain.VerificationToken;
 public interface VerificationTokenRepository extends JpaRepository<VerificationToken, Long> {
     
 	VerificationToken findByUser(User user);
-
 }
 
