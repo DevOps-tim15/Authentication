@@ -63,10 +63,10 @@ public class AuthenticationController {
 			return new ResponseEntity<Boolean>(userDetailsService.confirmRegistration(token), HttpStatus.CREATED);
 		}
 		catch(InvalidDataException e) {
-			return new ResponseEntity<String>(e.getMessage(), HttpStatus.NOT_ACCEPTABLE);
+			return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_ACCEPTABLE);
 		}
 		catch(Exception e) {
-			return new ResponseEntity<String>(e.getMessage(), HttpStatus.BAD_REQUEST);
+			return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
 		}
 	}
 	

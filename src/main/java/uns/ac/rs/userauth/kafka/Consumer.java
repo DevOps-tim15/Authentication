@@ -7,7 +7,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.mail.MailException;
 import org.springframework.messaging.handler.annotation.SendTo;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Service;
@@ -15,9 +14,7 @@ import org.springframework.stereotype.Service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import uns.ac.rs.userauth.domain.User;
 import uns.ac.rs.userauth.kafka.domain.UserMessage;
-import uns.ac.rs.userauth.security.TokenBasedAuthentication;
 import uns.ac.rs.userauth.security.TokenUtils;
 import uns.ac.rs.userauth.service.CustomUserDetailsService;
 
@@ -48,10 +45,7 @@ public class Consumer {
 		try {
 			message = objectMapper.readValue(value, UserMessage.class);
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
 		}
-		System.out.println("Consumer has read message!");
 		if(message.getType().equals("registration-rollback")) {
 			customUserDetailsService.deleteUser(message.getUser());
 		}
@@ -59,8 +53,7 @@ public class Consumer {
 	
     @SendTo
     @KafkaListener(topics = "logged-in", groupId = "mygroup")
-    public String checkLoggedIn(String authToken) throws JsonProcessingException {
-    	System.out.println("HI!");   
+    public String checkLoggedIn(String authToken) {
 		String username = tokenUtils.getUsernameFromToken(authToken);
 		String auth = null;
 		if (username != null) {
@@ -68,7 +61,7 @@ public class Consumer {
 			UserDetails userDetails = userDetailsService.loadUserByUsername(username);
 			
 			// proveri da li je prosledjeni token validan
-			if (tokenUtils.validateToken(authToken, userDetails)) {
+			if (tokenUtils.validateToken(authToken, userDetails) == true) {
 				// kreiraj autentifikaciju
 				auth = username;
 			}

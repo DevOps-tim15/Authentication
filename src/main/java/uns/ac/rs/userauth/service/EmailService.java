@@ -26,7 +26,7 @@ public class EmailService {
 	private Environment env;
 
 	@Async
-	public void sendNotificaitionAsyncRegistration(User user, String message, String subject) throws MailException, InterruptedException, UnsupportedEncodingException {
+	public void sendNotificaitionAsyncRegistration(User user, String message, String subject) throws MailException{
 		System.out.println("VErification");
 		SimpleMailMessage mail = new SimpleMailMessage();
 		mail.setTo(user.getEmail());

@@ -1,7 +1,6 @@
 package uns.ac.rs.userauth.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Query;
 
 import uns.ac.rs.userauth.domain.User;
 import uns.ac.rs.userauth.domain.VerificationToken;

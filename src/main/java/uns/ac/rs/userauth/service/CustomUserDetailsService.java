@@ -73,7 +73,7 @@ public class CustomUserDetailsService implements UserDetailsService {
 		return this.passwordEncoder.encode(password);		
 	}
 	
-	public User saveRegisteredUser(UserRegistrationDTO ru) throws InvalidDataException, MailException, UnsupportedEncodingException, InterruptedException, JsonProcessingException {
+	public User saveRegisteredUser(UserRegistrationDTO ru) throws InvalidDataException, MailException, UnsupportedEncodingException, InterruptedException {
 		
 		User u = findByUsername(ru.getUsername());
 		if(u != null) {
