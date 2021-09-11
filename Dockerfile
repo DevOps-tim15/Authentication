@@ -1,4 +1,4 @@
-FROM maven:3.8.2-jdk-11 AS appServerTest
+FROM kaca97/maven-repo:0.1.0 AS appServerTest
 ARG STAGE=test
 WORKDIR /usr/src/userauth
 COPY . .

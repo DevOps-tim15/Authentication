@@ -12,6 +12,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.MailException;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -22,6 +23,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 
 import uns.ac.rs.userauth.domain.Authority;
 import uns.ac.rs.userauth.domain.User;
+import uns.ac.rs.userauth.domain.UserType;
 import uns.ac.rs.userauth.domain.VerificationToken;
 import uns.ac.rs.userauth.dto.UserRegistrationDTO;
 import uns.ac.rs.userauth.kafka.Producer;
@@ -29,6 +31,7 @@ import uns.ac.rs.userauth.kafka.domain.UserMessage;
 import uns.ac.rs.userauth.mapper.UserMapper;
 import uns.ac.rs.userauth.repository.AuthorityRepository;
 import uns.ac.rs.userauth.repository.UserRepository;
+import uns.ac.rs.userauth.security.TokenUtils;
 import uns.ac.rs.userauth.util.InvalidDataException;
 
 @Service
@@ -53,6 +56,9 @@ public class CustomUserDetailsService implements UserDetailsService {
 
 	@Autowired 
 	private Producer producer;
+
+	@Autowired
+	private TokenUtils tokenUtils;
 
 	@Override
 	public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
@@ -118,6 +124,59 @@ public class CustomUserDetailsService implements UserDetailsService {
 		return u;
 	}
 	
+	public String updateUser(UserRegistrationDTO ru) throws InvalidDataException, JsonProcessingException {
+		
+		User contextUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+		String oldUsername = contextUser.getUsername();
+		User user = findByUsername(contextUser.getUsername());
+		User u = findByUsername(ru.getUsername());
+		if(u != null && (!ru.getUsername().equals(user.getUsername()))) {
+			throw new InvalidDataException("Username already taken!"); 
+		}
+		u = findByEmail(ru.getEmail());
+		if(u != null && (!ru.getEmail().equals(user.getEmail()))) {
+			throw new InvalidDataException("Email already taken!"); 
+		}
+		
+		if(Stream.of(ru.getUsername(), ru.getFirstName(), ru.getLastName(), ru.getEmail()).anyMatch(Objects::isNull)) {
+			throw new InvalidDataException("Some data is missing");
+		}
+		
+		if (ru.getUsername().isEmpty() || ru.getFirstName().isEmpty() || ru.getLastName().isEmpty() || ru.getEmail().isEmpty()) {
+			throw new InvalidDataException("User information is incomplete!");
+		}
+		
+		if (ru.getUsername().isEmpty() || ru.getFirstName().isEmpty() || ru.getLastName().isEmpty() || ru.getEmail().isEmpty()
+				) {
+			throw new InvalidDataException("User information is incomplete!");
+		}
+
+		user.setUsername(ru.getUsername());
+		user.setFirstName(ru.getLastName());
+		user.setLastName(ru.getLastName());
+		user.setEmail(ru.getEmail());
+		user.setPhone(ru.getPhone());
+		user.setSex(ru.getSex());
+		user.setWebsiteUrl(ru.getWebsiteUrl());
+		user.setBiography(ru.getBiography());
+		user.setBirthDate(ru.getBirthDate());
+		user.setIsPrivate(ru.getIsPrivate());
+		user.setCanBeTagged(ru.getCanBeTagged());
+		user.setAuthorities(contextUser.getAuthorities());
+		user = this.userRepository.save(user);
+		contextUser = user;
+		String token = "noToken";
+		if(!user.getUsername().equals(oldUsername)) {
+			token = this.updateToken(user.getUsername(), user.getAuthorities().get(0).getUserType());
+		}
+		UserType ut = UserType.valueOf(user.getAuthorities().get(0).getUserType());
+		UserMessage message = new UserMessage(user, oldUsername, ut , "update");
+		producer.sendMessageToTopic("auth-topic", message);
+		return token;
+	}
+	
+	
+	
 	public User findByUsername(String username) {
 		return userRepository.findByUsername(username);
 	}
@@ -154,5 +213,17 @@ public class CustomUserDetailsService implements UserDetailsService {
 		String message = "Error happend while creating account! Please, try to register again!";
 		String subject = "Registration error!";
 		emailService.sendNotificaitionAsyncRegistration(user, message, subject);
+	}
+	
+	public UserRegistrationDTO getLoggedIn() {
+		String loggedUsername = SecurityContextHolder.getContext().getAuthentication().getName();
+		User user = findByUsername(loggedUsername);
+		UserRegistrationDTO dto = UserMapper.toUserRegistrationDTO(user);
+		return dto;
+	}
+		
+	private String updateToken(String username, String role) {
+		String jwt = tokenUtils.generateToken(username, role);
+		return jwt;
 	}
 }
