@@ -57,6 +57,7 @@ public class AuthenticationController {
 		}
 	}
 	
+	@PreAuthorize("hasRole('ROLE_REGISTERED_USER') || hasRole('ROLE_AGENT')")
 	@PutMapping(value = "/update", produces="text/plain")
 	public ResponseEntity<?> update(@RequestBody UserRegistrationDTO user) {
 		try {
