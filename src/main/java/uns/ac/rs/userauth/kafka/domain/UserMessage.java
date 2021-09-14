@@ -3,6 +3,7 @@ package uns.ac.rs.userauth.kafka.domain;
 import uns.ac.rs.userauth.domain.User;
 import uns.ac.rs.userauth.domain.UserType;
 
+
 public class UserMessage {
 	
 	private User user;

@@ -1,10 +1,10 @@
 package uns.ac.rs.userauth.integration;
 
 import static org.junit.Assert.assertEquals;
-import static org.mockito.ArgumentMatchers.any;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 
 import java.io.UnsupportedEncodingException;
 
@@ -18,6 +18,7 @@ import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -26,9 +27,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mail.MailException;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -69,21 +67,15 @@ public class AuthenticationIT {
 	@Autowired
 	private AuthenticationManager authenticationManager;
 	
-	@Autowired
+	@MockBean
 	private Producer producer;
 	
-	@Autowired
+	@MockBean
 	private EmailService emailService;
 	
 	String token;
-
-	@Before
-	public void mock() throws JsonProcessingException {
-	Producer spy = Mockito.spy(producer);
-	Mockito.doNothing().when(spy).sendMessageToTopic(any(String.class), any(UserMessage.class));
-	}
 	
-//	@Test
+	@Test
 	@Transactional
 	@Order(1)
 	public void userRegistration_successfully() throws Exception {
@@ -107,6 +99,7 @@ public class AuthenticationIT {
 //        
 //		Producer spy = Mockito.spy(producer);
 //		Mockito.doNothing().when(spy).sendMessageToTopic(any(String.class), any(UserMessage.class));
+        Mockito.doNothing().when(producer).sendMessageToTopic(any(String.class), any(UserMessage.class));
         
         VerificationToken verificationToken = verificationTokenRepository.findByUser(u);
         boolean confirmed = userService.confirmRegistration(verificationToken.getToken());
@@ -160,7 +153,7 @@ public class AuthenticationIT {
 		assertEquals(HttpStatus.NOT_ACCEPTABLE, response.getStatusCode());
 	}
 	
-//	@Test
+	@Test
 	@Transactional
 	@Order(5)
 	public void updateProfile_successfully() throws JsonProcessingException {
@@ -169,7 +162,7 @@ public class AuthenticationIT {
         token = loginResponse.getBody();
         
         UserRegistrationDTO dto = new UserRegistrationDTO();
-		dto.setUsername("novi user");
+		dto.setUsername("jova");
 		dto.setFirstName("Pera");
 		dto.setLastName("Peric");
 		dto.setBiography("New bio");
@@ -178,7 +171,8 @@ public class AuthenticationIT {
 //		Producer spy = Mockito.spy(producer);
 //		Mockito.doNothing().when(spy).sendMessageToTopic(any(String.class), any(UserMessage.class));
 		
-		
+        Mockito.doNothing().when(producer).sendMessageToTopic(any(String.class), any(UserMessage.class));
+
 		HttpHeaders headers = new HttpHeaders();
         headers.add("Authorization", "Bearer " + token);
 		HttpEntity<UserRegistrationDTO> httpEntity = new HttpEntity<UserRegistrationDTO>(dto,  headers);

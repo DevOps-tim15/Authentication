@@ -13,6 +13,7 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.MailException;
 import org.springframework.security.core.context.SecurityContextHolder;
+
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -24,6 +25,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import uns.ac.rs.userauth.domain.Authority;
 import uns.ac.rs.userauth.domain.User;
 import uns.ac.rs.userauth.domain.UserType;
+
 import uns.ac.rs.userauth.domain.VerificationToken;
 import uns.ac.rs.userauth.dto.UserRegistrationDTO;
 import uns.ac.rs.userauth.kafka.Producer;
@@ -174,8 +176,6 @@ public class CustomUserDetailsService implements UserDetailsService {
 		producer.sendMessageToTopic("auth-topic", message);
 		return token;
 	}
-	
-	
 	
 	public User findByUsername(String username) {
 		return userRepository.findByUsername(username);
