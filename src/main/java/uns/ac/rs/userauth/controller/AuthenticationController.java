@@ -16,10 +16,12 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.web.bind.annotation.CrossOrigin;
+
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -51,6 +53,30 @@ public class AuthenticationController {
 			return new ResponseEntity<String>(e.getMessage(), HttpStatus.NOT_ACCEPTABLE);
 		} catch ( MailException | UnsupportedEncodingException |  InterruptedException e ) {		
 			return new ResponseEntity<String>("Error while sending e-mail. Check to see if you entered it right!",HttpStatus.BAD_REQUEST);
+		} catch (Exception e ) {		
+			e.printStackTrace();
+		 return new ResponseEntity<String>(e.getMessage(),HttpStatus.BAD_REQUEST);
+		}
+	}
+	
+	@PreAuthorize("hasRole('ROLE_REGISTERED_USER') || hasRole('ROLE_AGENT')")
+	@PutMapping(value = "/update", produces="text/plain")
+	public ResponseEntity<?> update(@RequestBody UserRegistrationDTO user) {
+		try {
+			System.out.println(user);
+			return new ResponseEntity<>(userDetailsService.updateUser(user), HttpStatus.OK);
+		} catch (InvalidDataException e) {
+			return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_ACCEPTABLE);
+		} catch (Exception e ) {		
+			e.printStackTrace();
+		 return new ResponseEntity<>(e.getMessage(),HttpStatus.BAD_REQUEST);
+		}
+	}
+	
+	@PostMapping(value = "/getLoggedIn")
+	public ResponseEntity<?> update() {
+		try {
+			return new ResponseEntity<UserRegistrationDTO>(userDetailsService.getLoggedIn(), HttpStatus.OK);
 		} catch (Exception e ) {		
 			e.printStackTrace();
 		 return new ResponseEntity<String>(e.getMessage(),HttpStatus.BAD_REQUEST);

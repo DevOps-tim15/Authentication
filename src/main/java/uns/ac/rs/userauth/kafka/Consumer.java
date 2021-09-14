@@ -48,6 +48,8 @@ public class Consumer {
 		}
 		if(message.getType().equals("registration-rollback")) {
 			customUserDetailsService.deleteUser(message.getUser());
+		} else if(message.getType().equals("remove")) {
+			customUserDetailsService.deleteUser(message.getUser());
 		}
 	}
 	
